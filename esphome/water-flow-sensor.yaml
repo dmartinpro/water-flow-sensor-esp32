@@ -1,0 +1,140 @@
+# Pool filtration flow monitor — YF-DN40 + ESP32-S3
+#
+# Reports flow rate, cumulative volume, and a "no flow" alarm over MQTT.
+# See ../README.md for wiring, MQTT topics, and setup instructions.
+# Copy secrets.yaml.example to secrets.yaml (same folder) and fill it in
+# before flashing.
+
+substitutions:
+  device_name: "pool-flow-sensor"
+  friendly_name: "Pool Flow Sensor"
+  topic_prefix: "pool/flow-sensor"
+  flow_pulse_pin: GPIO4
+  # Flow rate (L/min) below which the sensor is considered "no flow"
+  no_flow_threshold_lpm: "1.0"
+  # How long flow must stay below the threshold before the alarm fires
+  no_flow_delay: "30s"
+
+esphome:
+  name: ${device_name}
+  friendly_name: ${friendly_name}
+  comment: "YF-DN40 water flow monitor for pool filtration pump"
+
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: esp-idf
+
+logger:
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  # Fallback hotspot if WiFi can't be reached, for on-site reconfiguration
+  ap:
+    ssid: "${friendly_name} Fallback"
+    password: !secret ap_fallback_password
+
+captive_portal:
+
+# Local status page at http://<device-ip>/ — handy for a quick check
+# without an MQTT client.
+web_server:
+  port: 80
+
+mqtt:
+  broker: !secret mqtt_broker
+  username: !secret mqtt_username
+  password: !secret mqtt_password
+  discovery: false
+  topic_prefix: ${topic_prefix}
+  birth_message:
+    topic: ${topic_prefix}/status
+    payload: "online"
+    retain: true
+  will_message:
+    topic: ${topic_prefix}/status
+    payload: "offline"
+    retain: true
+
+sensor:
+  # YF-DN40 pulse output. pulse_meter times the gap between pulses, so it
+  # reacts faster at low flow than a fixed-window pulse counter would.
+  - platform: pulse_meter
+    id: flow_rate
+    pin:
+      number: ${flow_pulse_pin}
+      mode:
+        input: true
+        pullup: false # external pull-up resistor is used — see wiring diagram
+    name: "${friendly_name} Flow Rate"
+    unit_of_measurement: "L/min"
+    device_class: water
+    state_class: measurement
+    accuracy_decimals: 2
+    icon: "mdi:water-pump"
+    # Debounce shorter than the ~14.8ms minimum pulse period at 150 L/min
+    # (the sensor's max rated flow), so real pulses at max flow aren't dropped.
+    internal_filter: 5ms
+    # Report 0 L/min if no pulse arrives for this long (fast "flow stopped"
+    # detection, rather than the 5 minute default).
+    timeout: 15s
+    state_topic: "${topic_prefix}/flow_rate"
+    filters:
+      # YF-DN40: F(Hz) = 0.45 x Q(L/min) -> 27 pulses/liter (constant,
+      # independent of flow rate) -> pulses/min / 27 = L/min.
+      - multiply: 0.037037
+    total:
+      id: total_volume
+      name: "${friendly_name} Total Volume"
+      # Counts from the last boot/OTA update only — it does not persist
+      # across power loss. See README "Future enhancements" if you need a
+      # true lifetime total.
+      unit_of_measurement: "L"
+      device_class: water
+      state_class: total_increasing
+      accuracy_decimals: 2
+      icon: "mdi:water"
+      state_topic: "${topic_prefix}/total_volume"
+      filters:
+        - multiply: 0.037037
+
+  - platform: wifi_signal
+    name: "${friendly_name} WiFi Signal"
+    update_interval: 60s
+    entity_category: diagnostic
+    state_topic: "${topic_prefix}/wifi_signal"
+
+  - platform: uptime
+    name: "${friendly_name} Uptime"
+    update_interval: 60s
+    entity_category: diagnostic
+    state_topic: "${topic_prefix}/uptime"
+
+binary_sensor:
+  # Sustained no-flow condition. Phase 1 is report-only: this does NOT
+  # control the pump. Combine it with your pump's own on/off state in
+  # Home Assistant / Node-RED / your automation of choice to decide
+  # whether a given no-flow reading is actually abnormal (the pump being
+  # off on schedule is not a fault).
+  - platform: template
+    id: no_flow_alarm
+    name: "${friendly_name} No Flow Alarm"
+    device_class: problem
+    state_topic: "${topic_prefix}/no_flow_alarm"
+    # template binary_sensor lambdas re-evaluate automatically (~every 16ms
+    # in the main loop), no update_interval needed here.
+    lambda: |-
+      if (!id(flow_rate).has_state()) return {};
+      return id(flow_rate).state < ${no_flow_threshold_lpm};
+    filters:
+      - delayed_on: ${no_flow_delay}
+      - delayed_off: 5s

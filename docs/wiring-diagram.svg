@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 720" font-family="Helvetica, Arial, sans-serif">
+  <rect x="0" y="0" width="1040" height="720" fill="#ffffff"/>
+
+  <text x="520" y="34" text-anchor="middle" font-size="22" font-weight="bold" fill="#111">Pool Flow Sensor — Wiring Diagram</text>
+  <text x="520" y="56" text-anchor="middle" font-size="13" fill="#555">YF-DN40 flow sensor + ESP32-S3 (phase 1: monitoring / MQTT reporting only)</text>
+
+  <!-- DC Supply -->
+  <rect x="40" y="120" width="180" height="90" rx="8" fill="#fdf3e7" stroke="#c8862a" stroke-width="2"/>
+  <text x="130" y="150" text-anchor="middle" font-size="14" font-weight="bold" fill="#111">12V / 24V DC</text>
+  <text x="130" y="168" text-anchor="middle" font-size="14" font-weight="bold" fill="#111">Power Supply</text>
+  <text x="130" y="188" text-anchor="middle" font-size="11" fill="#666">(existing supply)</text>
+  <text x="52" y="200" font-size="11" fill="#b23">+</text>
+  <text x="196" y="200" font-size="11" fill="#333">−</text>
+
+  <!-- Buck converter -->
+  <rect x="330" y="80" width="200" height="90" rx="8" fill="#eaf2fb" stroke="#2a6fc8" stroke-width="2"/>
+  <text x="430" y="112" text-anchor="middle" font-size="14" font-weight="bold" fill="#111">DC-DC Buck Converter</text>
+  <text x="430" y="130" text-anchor="middle" font-size="13" fill="#111">12/24V → 5V</text>
+  <text x="430" y="150" text-anchor="middle" font-size="11" fill="#666">(e.g. LM2596, set to 5.0V)</text>
+
+  <!-- ESP32-S3 -->
+  <rect x="680" y="150" width="260" height="260" rx="10" fill="#eef7ee" stroke="#2c8a3d" stroke-width="2"/>
+  <text x="810" y="180" text-anchor="middle" font-size="15" font-weight="bold" fill="#111">ESP32-S3-DevKitC-1</text>
+  <text x="810" y="198" text-anchor="middle" font-size="11" fill="#666">(or compatible ESP32-S3 dev board)</text>
+
+  <!-- ESP32 pin labels (left edge) -->
+  <circle cx="680" cy="240" r="4" fill="#b23"/>
+  <text x="670" y="244" text-anchor="end" font-size="12" fill="#111">5V / VIN</text>
+  <circle cx="680" cy="280" r="4" fill="#e0a000"/>
+  <text x="670" y="284" text-anchor="end" font-size="12" fill="#111">3V3</text>
+  <circle cx="680" cy="320" r="4" fill="#333"/>
+  <text x="670" y="324" text-anchor="end" font-size="12" fill="#111">GND</text>
+  <circle cx="680" cy="360" r="4" fill="#c9a400"/>
+  <text x="670" y="364" text-anchor="end" font-size="12" fill="#111">GPIO4</text>
+
+  <!-- YF-DN40 sensor -->
+  <rect x="680" y="510" width="260" height="120" rx="8" fill="#fdeeee" stroke="#c02b2b" stroke-width="2"/>
+  <text x="810" y="540" text-anchor="middle" font-size="15" font-weight="bold" fill="#111">YF-DN40</text>
+  <text x="810" y="558" text-anchor="middle" font-size="12" fill="#111">Water Flow Sensor</text>
+  <text x="810" y="576" text-anchor="middle" font-size="11" fill="#666">G1.5" inline, hall-effect / NPN pulse out</text>
+  <text x="810" y="600" text-anchor="middle" font-size="10" fill="#c02b2b">⚠ mind the flow-direction arrow on the sensor body</text>
+
+  <!-- Sensor pin labels (left edge) -->
+  <circle cx="680" cy="530" r="4" fill="#b23"/>
+  <text x="670" y="534" text-anchor="end" font-size="12" fill="#111">Red (VCC)</text>
+  <circle cx="680" cy="560" r="4" fill="#333"/>
+  <text x="670" y="564" text-anchor="end" font-size="12" fill="#111">Black (GND)</text>
+  <circle cx="680" cy="590" r="4" fill="#c9a400"/>
+  <text x="670" y="594" text-anchor="end" font-size="12" fill="#111">Yellow (Signal)</text>
+
+  <!-- Future / optional block (drawn early so wires render on top of it) -->
+  <rect x="40" y="480" width="560" height="150" rx="8" fill="#f4f4f4" stroke="#999" stroke-width="2" stroke-dasharray="6,4"/>
+  <text x="60" y="505" font-size="12" font-weight="bold" fill="#666">Not part of phase 1 (report-only):</text>
+  <text x="60" y="525" font-size="11" fill="#666">Future automatic pump cutoff would add a relay/SSR module driven from a</text>
+  <text x="60" y="543" font-size="11" fill="#666">spare ESP32-S3 GPIO, wired into your existing pump controller's low-voltage</text>
+  <text x="60" y="561" font-size="11" fill="#666">interlock input — gated by "no_flow_alarm" AND "pump expected to run",</text>
+  <text x="60" y="579" font-size="11" fill="#666">wired fail-safe so loss of ESP32 power stops the pump. See README.</text>
+
+  <!-- Pull-up resistor -->
+  <text x="605" y="272" text-anchor="middle" font-size="11" fill="#111">R1</text>
+  <text x="605" y="284" text-anchor="middle" font-size="10" fill="#666">4.7–10kΩ</text>
+  <path d="M 610 280 L 610 300 L 600 305 L 620 313 L 600 321 L 620 329 L 610 334 L 610 460"
+        fill="none" stroke="#c9a400" stroke-width="2"/>
+
+  <!-- Wires: DC supply + -> buck converter in -->
+  <path d="M 220 145 L 330 100" fill="none" stroke="#b23" stroke-width="2.5"/>
+  <!-- DC supply + -> sensor VCC (direct, bypassing buck converter) -->
+  <path d="M 220 150 L 260 150 L 260 530 L 680 530" fill="none" stroke="#b23" stroke-width="2.5"/>
+  <!-- Buck converter out -> ESP32 5V -->
+  <path d="M 530 125 L 610 125 L 610 240 L 680 240" fill="none" stroke="#b23" stroke-width="2.5" stroke-dasharray="0"/>
+  <text x="565" y="118" text-anchor="middle" font-size="10" fill="#b23">5V out</text>
+
+  <!-- ESP32 3V3 -> pull-up top -->
+  <path d="M 680 280 L 610 280" fill="none" stroke="#e0a000" stroke-width="2.5"/>
+  <!-- Pull-up bottom node -> GPIO4 -->
+  <path d="M 610 460 L 680 360" fill="none" stroke="#c9a400" stroke-width="2.5"/>
+  <!-- Pull-up bottom node -> sensor Yellow -->
+  <path d="M 610 460 L 610 590 L 680 590" fill="none" stroke="#c9a400" stroke-width="2.5"/>
+  <circle cx="610" cy="460" r="4" fill="#c9a400"/>
+
+  <!-- Common ground bus -->
+  <path d="M 130 210 L 130 660 L 940 660" fill="none" stroke="#333" stroke-width="2.5"/>
+  <path d="M 430 170 L 430 660" fill="none" stroke="#333" stroke-width="2.5"/>
+  <path d="M 680 320 L 640 320 L 640 660" fill="none" stroke="#333" stroke-width="2.5"/>
+  <path d="M 680 560 L 660 560 L 660 660" fill="none" stroke="#333" stroke-width="2.5"/>
+  <text x="945" y="664" font-size="11" fill="#333">common GND</text>
+
+  <!-- Legend -->
+  <rect x="40" y="68" width="14" height="14" fill="#b23"/>
+  <text x="60" y="79" font-size="11" fill="#333">12–24V / 5V power</text>
+  <rect x="230" y="68" width="14" height="14" fill="#c9a400"/>
+  <text x="250" y="79" font-size="11" fill="#333">3.3V pull-up / signal</text>
+  <rect x="440" y="68" width="14" height="14" fill="#333"/>
+  <text x="460" y="79" font-size="11" fill="#333">common ground</text>
+
+  <text x="20" y="700" font-size="10" fill="#999">Schematic wiring reference — not to scale. Full bill of materials and notes: README.md</text>
+</svg>

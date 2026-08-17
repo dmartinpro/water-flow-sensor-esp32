@@ -1,0 +1,3 @@
+# ESPHome secrets and build artifacts
+esphome/secrets.yaml
+esphome/.esphome/
