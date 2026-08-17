@@ -106,3 +106,6 @@ and a PCNT peripheral suitable for accurate pulse counting.
 - Don't invent additional sensors/features (pressure, temperature, pump
   current sensing, etc.) unless the user asks — scope is flow monitoring and
   optional flow-based pump safety cutoff.
+- **Always ask before running `git commit`** (or anything that creates a
+  commit), even if the changes were just made at the user's request. Wait
+  for explicit confirmation each time rather than committing proactively.
