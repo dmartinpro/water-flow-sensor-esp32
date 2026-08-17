@@ -1,6 +1,7 @@
 # Pool filtration flow monitor — YF-DN40 + ESP32-S3
 #
-# Reports flow rate, cumulative volume, and a "no flow" alarm over MQTT.
+# Reports flow rate, a 3s moving average of flow rate, cumulative volume,
+# and a "no flow" alarm over MQTT.
 # See ../README.md for wiring, MQTT topics, and setup instructions.
 # Copy secrets.yaml.example to secrets.yaml (same folder) and fill it in
 # before flashing.
@@ -14,6 +15,10 @@ substitutions:
   no_flow_threshold_lpm: "1.0"
   # How long flow must stay below the threshold before the alarm fires
   no_flow_delay: "30s"
+  # Bucket size for the moving average, and how many buckets it spans.
+  # Moving-average duration = average_sample_interval x average_window_size.
+  average_sample_interval: "1s"
+  average_window_size: "3"
 
 esphome:
   name: ${device_name}
@@ -106,6 +111,29 @@ sensor:
       state_topic: "${topic_prefix}/total_volume"
       filters:
         - multiply: 0.037037
+
+  # Moving average of flow_rate over average_sample_interval x
+  # average_window_size (3s by default). pulse_meter pushes updates
+  # irregularly (once per pulse), so a plain count-based moving average
+  # wouldn't correspond to a fixed time window — throttle_average first
+  # collapses those irregular updates into one evenly-spaced sample per
+  # average_sample_interval, then sliding_window_moving_average averages
+  # the last average_window_size of those samples.
+  - platform: copy
+    source_id: flow_rate
+    id: average_flow_3s
+    name: "${friendly_name} Average Flow 3s"
+    unit_of_measurement: "L/min"
+    device_class: water
+    state_class: measurement
+    accuracy_decimals: 2
+    icon: "mdi:chart-bell-curve"
+    state_topic: "${topic_prefix}/average_flow_3s"
+    filters:
+      - throttle_average: ${average_sample_interval}
+      - sliding_window_moving_average:
+          window_size: ${average_window_size}
+          send_every: 1
 
   - platform: wifi_signal
     name: "${friendly_name} WiFi Signal"

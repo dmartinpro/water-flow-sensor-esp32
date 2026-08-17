@@ -79,6 +79,7 @@ Broker, prefix, and credentials are all set in `esphome/secrets.yaml` (see
 |---|---|---|
 | `pool/flow-sensor/status` | `online` / `offline` | Retained availability (MQTT LWT). Subscribe to this to know if the device itself has dropped off, as distinct from a real no-flow condition. |
 | `pool/flow-sensor/flow_rate` | float, L/min | Updates on each pulse; reports `0` if no pulse for 15s. |
+| `pool/flow-sensor/average_flow_3s` | float, L/min | 3-second moving average of `flow_rate`, updated once per second. Smooths out per-pulse jitter — better suited to dashboards/graphs than the raw `flow_rate`. |
 | `pool/flow-sensor/total_volume` | float, L | Cumulative since last boot/OTA — **does not persist across power loss**, see [Future enhancements](#future-enhancements). |
 | `pool/flow-sensor/no_flow_alarm` | `ON` / `OFF` | `ON` after flow stays below 1.0 L/min for 30 seconds straight. Report-only — your automation decides what to do with it. |
 | `pool/flow-sensor/wifi_signal` | int, dBm | Diagnostic. |
@@ -145,6 +146,8 @@ Edit the `substitutions:` block at the top of
 | `flow_pulse_pin` | `GPIO4` | Change if you wire the sensor to a different pin. |
 | `no_flow_threshold_lpm` | `1.0` | Flow rate (L/min) below which "no flow" is considered true. |
 | `no_flow_delay` | `30s` | How long low flow must persist before `no_flow_alarm` fires — avoids false alarms from priming/air-purge transients. |
+| `average_sample_interval` | `1s` | Bucket size the raw `flow_rate` is averaged into before the moving average is computed. |
+| `average_window_size` | `3` | Number of buckets the moving average spans. Duration = `average_sample_interval` × `average_window_size` (3s by default). |
 
 If you ever swap in a different flow sensor model, update the two
 `multiply: 0.037037` filter values (`1 / pulses-per-liter` — the YF-DN40's
