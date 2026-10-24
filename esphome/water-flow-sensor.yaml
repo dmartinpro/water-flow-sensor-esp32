@@ -1,4 +1,4 @@
-# Pool filtration flow monitor — YF-DN40 + ESP32-S3
+# Pool filtration flow monitor — YF-DN40 + ESP32
 #
 # Reports flow rate, a 3s moving average of flow rate, cumulative volume,
 # and a "no flow" alarm over MQTT.
@@ -26,7 +26,7 @@ esphome:
   comment: "YF-DN40 water flow monitor for pool filtration pump"
 
 esp32:
-  board: esp32-s3-devkitc-1
+  board: esp32dev
   framework:
     type: esp-idf
 

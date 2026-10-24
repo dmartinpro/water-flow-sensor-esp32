@@ -5,7 +5,7 @@ Guidance for Claude Code (and future me) when working in this repository.
 ## Project purpose
 
 Monitor water flow in a swimming pool filtration installation using a **YF-DN40**
-hall-effect flow sensor wired to an **ESP32-S3**, and publish live readings to
+hall-effect flow sensor wired to an **ESP32**, and publish live readings to
 **MQTT**. The MQTT data is used to:
 
 1. Confirm the filtration pump is actually circulating water (dashboarding /
@@ -35,9 +35,9 @@ validated with the user:
 - **MQTT**: standalone broker (Mosquitto), no Home Assistant. Discovery is
   off; topics are plain and documented in `README.md`.
 - **Power**: 12V/24V DC already available at the equipment pad → buck
-  converter to 5V for the ESP32-S3; sensor powered directly from the raw
+  converter to 5V for the ESP32; sensor powered directly from the raw
   12/24V rail (within its 3.5–24V spec).
-- **Board**: ESP32-S3-DevKitC-1 (or pin-compatible dev board). Pulse input on
+- **Board**: ESP32-DevKitC (or pin-compatible dev board). Pulse input on
   GPIO4 with an external 4.7–10 kΩ pull-up to 3V3 (sensor output is NPN
   open-collector).
 
@@ -64,8 +64,11 @@ it in sync with any change to `esphome/water-flow-sensor.yaml`.
   comfortably accurate; no exotic timing constraints.
 - Pressure rating ≤1.75 MPa, operating temp ≤80°C.
 
-**Target MCU**: ESP32-S3 (user preference, fixed). Note the S3 has native USB
-and a PCNT peripheral suitable for accurate pulse counting.
+**Target MCU**: classic ESP32 (ESP32-D0WDQ6, 4 MB flash, micro-USB with a
+CP2102 USB-UART chip). The user first planned an ESP32-S3, but the board
+actually connected is a classic ESP32, so the firmware targets `esp32dev`.
+The classic ESP32 also has a PCNT peripheral suitable for accurate pulse
+counting. GPIO4 is a plain I/O pin on both chips, so wiring is unchanged.
 
 ## Design considerations to keep in mind
 

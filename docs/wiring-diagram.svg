@@ -1,97 +1,167 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 720" font-family="Helvetica, Arial, sans-serif">
-  <rect x="0" y="0" width="1040" height="720" fill="#ffffff"/>
-
-  <text x="520" y="34" text-anchor="middle" font-size="22" font-weight="bold" fill="#111">Pool Flow Sensor — Wiring Diagram</text>
-  <text x="520" y="56" text-anchor="middle" font-size="13" fill="#555">YF-DN40 flow sensor + ESP32-S3 (phase 1: monitoring / MQTT reporting only)</text>
-
-  <!-- DC Supply -->
-  <rect x="40" y="120" width="180" height="90" rx="8" fill="#fdf3e7" stroke="#c8862a" stroke-width="2"/>
-  <text x="130" y="150" text-anchor="middle" font-size="14" font-weight="bold" fill="#111">12V / 24V DC</text>
-  <text x="130" y="168" text-anchor="middle" font-size="14" font-weight="bold" fill="#111">Power Supply</text>
-  <text x="130" y="188" text-anchor="middle" font-size="11" fill="#666">(existing supply)</text>
-  <text x="52" y="200" font-size="11" fill="#b23">+</text>
-  <text x="196" y="200" font-size="11" fill="#333">−</text>
-
-  <!-- Buck converter -->
-  <rect x="330" y="80" width="200" height="90" rx="8" fill="#eaf2fb" stroke="#2a6fc8" stroke-width="2"/>
-  <text x="430" y="112" text-anchor="middle" font-size="14" font-weight="bold" fill="#111">DC-DC Buck Converter</text>
-  <text x="430" y="130" text-anchor="middle" font-size="13" fill="#111">12/24V → 5V</text>
-  <text x="430" y="150" text-anchor="middle" font-size="11" fill="#666">(e.g. LM2596, set to 5.0V)</text>
-
-  <!-- ESP32-S3 -->
-  <rect x="680" y="150" width="260" height="260" rx="10" fill="#eef7ee" stroke="#2c8a3d" stroke-width="2"/>
-  <text x="810" y="180" text-anchor="middle" font-size="15" font-weight="bold" fill="#111">ESP32-S3-DevKitC-1</text>
-  <text x="810" y="198" text-anchor="middle" font-size="11" fill="#666">(or compatible ESP32-S3 dev board)</text>
-
-  <!-- ESP32 pin labels (left edge) -->
-  <circle cx="680" cy="240" r="4" fill="#b23"/>
-  <text x="670" y="244" text-anchor="end" font-size="12" fill="#111">5V / VIN</text>
-  <circle cx="680" cy="280" r="4" fill="#e0a000"/>
-  <text x="670" y="284" text-anchor="end" font-size="12" fill="#111">3V3</text>
-  <circle cx="680" cy="320" r="4" fill="#333"/>
-  <text x="670" y="324" text-anchor="end" font-size="12" fill="#111">GND</text>
-  <circle cx="680" cy="360" r="4" fill="#c9a400"/>
-  <text x="670" y="364" text-anchor="end" font-size="12" fill="#111">GPIO4</text>
-
-  <!-- YF-DN40 sensor -->
-  <rect x="680" y="510" width="260" height="120" rx="8" fill="#fdeeee" stroke="#c02b2b" stroke-width="2"/>
-  <text x="810" y="540" text-anchor="middle" font-size="15" font-weight="bold" fill="#111">YF-DN40</text>
-  <text x="810" y="558" text-anchor="middle" font-size="12" fill="#111">Water Flow Sensor</text>
-  <text x="810" y="576" text-anchor="middle" font-size="11" fill="#666">G1.5" inline, hall-effect / NPN pulse out</text>
-  <text x="810" y="600" text-anchor="middle" font-size="10" fill="#c02b2b">⚠ mind the flow-direction arrow on the sensor body</text>
-
-  <!-- Sensor pin labels (left edge) -->
-  <circle cx="680" cy="530" r="4" fill="#b23"/>
-  <text x="670" y="534" text-anchor="end" font-size="12" fill="#111">Red (VCC)</text>
-  <circle cx="680" cy="560" r="4" fill="#333"/>
-  <text x="670" y="564" text-anchor="end" font-size="12" fill="#111">Black (GND)</text>
-  <circle cx="680" cy="590" r="4" fill="#c9a400"/>
-  <text x="670" y="594" text-anchor="end" font-size="12" fill="#111">Yellow (Signal)</text>
-
-  <!-- Future / optional block (drawn early so wires render on top of it) -->
-  <rect x="40" y="480" width="560" height="150" rx="8" fill="#f4f4f4" stroke="#999" stroke-width="2" stroke-dasharray="6,4"/>
-  <text x="60" y="505" font-size="12" font-weight="bold" fill="#666">Not part of phase 1 (report-only):</text>
-  <text x="60" y="525" font-size="11" fill="#666">Future automatic pump cutoff would add a relay/SSR module driven from a</text>
-  <text x="60" y="543" font-size="11" fill="#666">spare ESP32-S3 GPIO, wired into your existing pump controller's low-voltage</text>
-  <text x="60" y="561" font-size="11" fill="#666">interlock input — gated by "no_flow_alarm" AND "pump expected to run",</text>
-  <text x="60" y="579" font-size="11" fill="#666">wired fail-safe so loss of ESP32 power stops the pump. See README.</text>
-
-  <!-- Pull-up resistor -->
-  <text x="605" y="272" text-anchor="middle" font-size="11" fill="#111">R1</text>
-  <text x="605" y="284" text-anchor="middle" font-size="10" fill="#666">4.7–10kΩ</text>
-  <path d="M 610 280 L 610 300 L 600 305 L 620 313 L 600 321 L 620 329 L 610 334 L 610 460"
-        fill="none" stroke="#c9a400" stroke-width="2"/>
-
-  <!-- Wires: DC supply + -> buck converter in -->
-  <path d="M 220 145 L 330 100" fill="none" stroke="#b23" stroke-width="2.5"/>
-  <!-- DC supply + -> sensor VCC (direct, bypassing buck converter) -->
-  <path d="M 220 150 L 260 150 L 260 530 L 680 530" fill="none" stroke="#b23" stroke-width="2.5"/>
-  <!-- Buck converter out -> ESP32 5V -->
-  <path d="M 530 125 L 610 125 L 610 240 L 680 240" fill="none" stroke="#b23" stroke-width="2.5" stroke-dasharray="0"/>
-  <text x="565" y="118" text-anchor="middle" font-size="10" fill="#b23">5V out</text>
-
-  <!-- ESP32 3V3 -> pull-up top -->
-  <path d="M 680 280 L 610 280" fill="none" stroke="#e0a000" stroke-width="2.5"/>
-  <!-- Pull-up bottom node -> GPIO4 -->
-  <path d="M 610 460 L 680 360" fill="none" stroke="#c9a400" stroke-width="2.5"/>
-  <!-- Pull-up bottom node -> sensor Yellow -->
-  <path d="M 610 460 L 610 590 L 680 590" fill="none" stroke="#c9a400" stroke-width="2.5"/>
-  <circle cx="610" cy="460" r="4" fill="#c9a400"/>
-
-  <!-- Common ground bus -->
-  <path d="M 130 210 L 130 660 L 940 660" fill="none" stroke="#333" stroke-width="2.5"/>
-  <path d="M 430 170 L 430 660" fill="none" stroke="#333" stroke-width="2.5"/>
-  <path d="M 680 320 L 640 320 L 640 660" fill="none" stroke="#333" stroke-width="2.5"/>
-  <path d="M 680 560 L 660 560 L 660 660" fill="none" stroke="#333" stroke-width="2.5"/>
-  <text x="945" y="664" font-size="11" fill="#333">common GND</text>
-
-  <!-- Legend -->
-  <rect x="40" y="68" width="14" height="14" fill="#b23"/>
-  <text x="60" y="79" font-size="11" fill="#333">12–24V / 5V power</text>
-  <rect x="230" y="68" width="14" height="14" fill="#c9a400"/>
-  <text x="250" y="79" font-size="11" fill="#333">3.3V pull-up / signal</text>
-  <rect x="440" y="68" width="14" height="14" fill="#333"/>
-  <text x="460" y="79" font-size="11" fill="#333">common ground</text>
-
-  <text x="20" y="700" font-size="10" fill="#999">Schematic wiring reference — not to scale. Full bill of materials and notes: README.md</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 860" font-family="Helvetica, Arial, sans-serif">
+<rect width="1200" height="860" fill="#fff"/>
+<text x="600" y="34" text-anchor="middle" font-size="22" font-weight="bold" fill="#111">Pool Flow Sensor — Wiring Diagram</text>
+<text x="600" y="56" text-anchor="middle" font-size="13" fill="#555">YF-DN40 flow sensor + ESP32 DevKit (micro-USB, CP2102) — phase 1: monitoring / MQTT only</text>
+<rect x="40" y="72" width="14" height="14" fill="#b71c1c"/><text x="60" y="83" font-size="11" fill="#333">12–24 V supply</text>
+<rect x="200" y="72" width="14" height="14" fill="#e53935"/><text x="220" y="83" font-size="11" fill="#333">5 V</text>
+<rect x="280" y="72" width="14" height="14" fill="#ef8f00"/><text x="300" y="83" font-size="11" fill="#333">3.3 V</text>
+<rect x="370" y="72" width="14" height="14" fill="#d9a800"/><text x="390" y="83" font-size="11" fill="#333">pulse signal</text>
+<rect x="490" y="72" width="14" height="14" fill="#222"/><text x="510" y="83" font-size="11" fill="#333">GND</text>
+<rect x="470" y="150" width="200" height="500" rx="10" fill="#16263d" stroke="#0a1422" stroke-width="2"/>
+<rect x="520" y="156" width="100" height="50" fill="#0e1a2b"/>
+<path d="M528 198 V166 H540 V198 H552 V166 H564 V198 H576 V166 H588 V198 H600 V166 H612" fill="none" stroke="#d4af37" stroke-width="3"/>
+<rect x="520" y="210" width="100" height="130" fill="#cfd4db" stroke="#8a93a0" stroke-width="1.5"/>
+<text x="570" y="262" text-anchor="middle" font-size="10" font-weight="bold" fill="#333">ESP32-</text>
+<text x="570" y="276" text-anchor="middle" font-size="10" font-weight="bold" fill="#333">WROOM-32</text>
+<text x="570" y="292" text-anchor="middle" font-size="8" fill="#555">4 MB flash</text>
+<text x="570" y="400" text-anchor="middle" font-size="11" fill="#9fb3cc">ESP32-DevKitC</text>
+<text x="570" y="414" text-anchor="middle" font-size="9" fill="#9fb3cc">38 pins, USB at bottom</text>
+<rect x="555" y="545" width="30" height="30" fill="#111"/><text x="570" y="563" text-anchor="middle" font-size="7" fill="#ddd">CP2102</text>
+<circle cx="600" cy="530" r="4" fill="#ff3b30"/><text x="610" y="533" font-size="7" fill="#9fb3cc">PWR</text>
+<rect x="515" y="612" width="22" height="16" rx="2" fill="#bfc5cc"/><text x="526" y="644" text-anchor="middle" font-size="8" fill="#9fb3cc">EN</text>
+<rect x="603" y="612" width="22" height="16" rx="2" fill="#bfc5cc"/><text x="614" y="644" text-anchor="middle" font-size="8" fill="#9fb3cc">BOOT</text>
+<rect x="545" y="640" width="50" height="34" rx="3" fill="#cfd4db" stroke="#8a93a0"/><text x="570" y="662" text-anchor="middle" font-size="9" fill="#333">micro-USB</text>
+<rect x="475" y="185" width="10" height="10" fill="#ef8f00" stroke="#fff" stroke-width="1.5"/>
+<text x="490" y="193" font-size="9" fill="#fff" font-weight="bold">3V3</text>
+<rect x="475" y="209" width="10" height="10" fill="#d4af37"/>
+<text x="490" y="217" font-size="9" fill="#9fb3cc">EN</text>
+<rect x="475" y="233" width="10" height="10" fill="#d4af37"/>
+<text x="490" y="241" font-size="9" fill="#9fb3cc">VP</text>
+<rect x="475" y="257" width="10" height="10" fill="#d4af37"/>
+<text x="490" y="265" font-size="9" fill="#9fb3cc">VN</text>
+<rect x="475" y="281" width="10" height="10" fill="#d4af37"/>
+<text x="490" y="289" font-size="9" fill="#9fb3cc">34</text>
+<rect x="475" y="305" width="10" height="10" fill="#d4af37"/>
+<text x="490" y="313" font-size="9" fill="#9fb3cc">35</text>
+<rect x="475" y="329" width="10" height="10" fill="#d4af37"/>
+<text x="490" y="337" font-size="9" fill="#9fb3cc">32</text>
+<rect x="475" y="353" width="10" height="10" fill="#d4af37"/>
+<text x="490" y="361" font-size="9" fill="#9fb3cc">33</text>
+<rect x="475" y="377" width="10" height="10" fill="#d4af37"/>
+<text x="490" y="385" font-size="9" fill="#9fb3cc">25</text>
+<rect x="475" y="401" width="10" height="10" fill="#d4af37"/>
+<text x="490" y="409" font-size="9" fill="#9fb3cc">26</text>
+<rect x="475" y="425" width="10" height="10" fill="#d4af37"/>
+<text x="490" y="433" font-size="9" fill="#9fb3cc">27</text>
+<rect x="475" y="449" width="10" height="10" fill="#d4af37"/>
+<text x="490" y="457" font-size="9" fill="#9fb3cc">14</text>
+<rect x="475" y="473" width="10" height="10" fill="#d4af37"/>
+<text x="490" y="481" font-size="9" fill="#9fb3cc">12</text>
+<rect x="475" y="497" width="10" height="10" fill="#222" stroke="#fff" stroke-width="1.5"/>
+<text x="490" y="505" font-size="9" fill="#fff" font-weight="bold">GND</text>
+<rect x="475" y="521" width="10" height="10" fill="#d4af37"/>
+<text x="490" y="529" font-size="9" fill="#9fb3cc">13</text>
+<rect x="475" y="545" width="10" height="10" fill="#d4af37"/>
+<text x="490" y="553" font-size="9" fill="#9fb3cc">D2</text>
+<rect x="475" y="569" width="10" height="10" fill="#d4af37"/>
+<text x="490" y="577" font-size="9" fill="#9fb3cc">D3</text>
+<rect x="475" y="593" width="10" height="10" fill="#d4af37"/>
+<text x="490" y="601" font-size="9" fill="#9fb3cc">CMD</text>
+<rect x="475" y="617" width="10" height="10" fill="#d32f2f" stroke="#fff" stroke-width="1.5"/>
+<text x="490" y="625" font-size="9" fill="#fff" font-weight="bold">5V</text>
+<rect x="655" y="185" width="10" height="10" fill="#d4af37"/>
+<text x="650" y="193" text-anchor="end" font-size="9" fill="#9fb3cc">GND</text>
+<rect x="655" y="209" width="10" height="10" fill="#d4af37"/>
+<text x="650" y="217" text-anchor="end" font-size="9" fill="#9fb3cc">23</text>
+<rect x="655" y="233" width="10" height="10" fill="#d4af37"/>
+<text x="650" y="241" text-anchor="end" font-size="9" fill="#9fb3cc">22</text>
+<rect x="655" y="257" width="10" height="10" fill="#d4af37"/>
+<text x="650" y="265" text-anchor="end" font-size="9" fill="#9fb3cc">TX</text>
+<rect x="655" y="281" width="10" height="10" fill="#d4af37"/>
+<text x="650" y="289" text-anchor="end" font-size="9" fill="#9fb3cc">RX</text>
+<rect x="655" y="305" width="10" height="10" fill="#d4af37"/>
+<text x="650" y="313" text-anchor="end" font-size="9" fill="#9fb3cc">21</text>
+<rect x="655" y="329" width="10" height="10" fill="#d4af37"/>
+<text x="650" y="337" text-anchor="end" font-size="9" fill="#9fb3cc">GND</text>
+<rect x="655" y="353" width="10" height="10" fill="#d4af37"/>
+<text x="650" y="361" text-anchor="end" font-size="9" fill="#9fb3cc">19</text>
+<rect x="655" y="377" width="10" height="10" fill="#d4af37"/>
+<text x="650" y="385" text-anchor="end" font-size="9" fill="#9fb3cc">18</text>
+<rect x="655" y="401" width="10" height="10" fill="#d4af37"/>
+<text x="650" y="409" text-anchor="end" font-size="9" fill="#9fb3cc">5</text>
+<rect x="655" y="425" width="10" height="10" fill="#d4af37"/>
+<text x="650" y="433" text-anchor="end" font-size="9" fill="#9fb3cc">17</text>
+<rect x="655" y="449" width="10" height="10" fill="#d4af37"/>
+<text x="650" y="457" text-anchor="end" font-size="9" fill="#9fb3cc">16</text>
+<rect x="655" y="473" width="10" height="10" fill="#e0b000" stroke="#fff" stroke-width="1.5"/>
+<text x="650" y="481" text-anchor="end" font-size="9" fill="#fff" font-weight="bold">4</text>
+<rect x="655" y="497" width="10" height="10" fill="#d4af37"/>
+<text x="650" y="505" text-anchor="end" font-size="9" fill="#9fb3cc">0</text>
+<rect x="655" y="521" width="10" height="10" fill="#d4af37"/>
+<text x="650" y="529" text-anchor="end" font-size="9" fill="#9fb3cc">2</text>
+<rect x="655" y="545" width="10" height="10" fill="#d4af37"/>
+<text x="650" y="553" text-anchor="end" font-size="9" fill="#9fb3cc">15</text>
+<rect x="655" y="569" width="10" height="10" fill="#d4af37"/>
+<text x="650" y="577" text-anchor="end" font-size="9" fill="#9fb3cc">D1</text>
+<rect x="655" y="593" width="10" height="10" fill="#d4af37"/>
+<text x="650" y="601" text-anchor="end" font-size="9" fill="#9fb3cc">D0</text>
+<rect x="655" y="617" width="10" height="10" fill="#d4af37"/>
+<text x="650" y="625" text-anchor="end" font-size="9" fill="#9fb3cc">CLK</text>
+<text x="668" y="470" font-size="10" font-weight="bold" fill="#b88a00">GPIO4</text>
+<rect x="40" y="560" width="160" height="100" rx="6" fill="#f3eadb" stroke="#b8860b" stroke-width="2"/>
+<text x="115" y="602" text-anchor="middle" font-size="13" font-weight="bold" fill="#111">12 / 24 V DC</text><text x="115" y="620" text-anchor="middle" font-size="12" fill="#111">power supply</text><text x="115" y="637" text-anchor="middle" font-size="10" fill="#666">(existing)</text>
+<text x="190" y="594" text-anchor="end" font-size="11" font-weight="bold" fill="#111">−</text><text x="190" y="626" text-anchor="end" font-size="11" font-weight="bold" fill="#b71c1c">+</text>
+<text x="345" y="548" text-anchor="middle" font-size="11" font-weight="bold" fill="#111">DC-DC buck converter</text>
+<rect x="270" y="560" width="150" height="100" rx="4" fill="#1f5fbf" stroke="#12376f" stroke-width="2"/>
+<rect x="310" y="568" width="50" height="30" fill="#111"/><text x="335" y="586" text-anchor="middle" font-size="8" fill="#ddd">LM2596</text>
+<circle cx="376" cy="582" r="8" fill="#e8e8e8" stroke="#555"/><line x1="371" y1="582" x2="381" y2="582" stroke="#555"/>
+<circle cx="320" cy="635" r="15" fill="#3b2f1e" stroke="#222"/><circle cx="372" cy="637" r="10" fill="#c0c4ca" stroke="#555"/>
+<text x="276" y="594" text-anchor="start" font-size="9" font-weight="bold" fill="#fff">IN−</text>
+<text x="276" y="626" text-anchor="start" font-size="9" font-weight="bold" fill="#fff">IN+</text>
+<text x="414" y="594" text-anchor="end" font-size="9" font-weight="bold" fill="#fff">OUT−</text>
+<text x="414" y="626" text-anchor="end" font-size="9" font-weight="bold" fill="#fff">OUT+</text>
+<text x="345" y="676" text-anchor="middle" font-size="10" fill="#555">set output to 5.0 V with the trimmer</text>
+<rect x="771" y="355" width="18" height="72" rx="6" fill="#d9b88a" stroke="#8a6d3b"/>
+<rect x="771" y="366" width="18" height="5" fill="#f2d200"/>
+<rect x="771" y="376" width="18" height="5" fill="#7b1fa2"/>
+<rect x="771" y="386" width="18" height="5" fill="#d32f2f"/>
+<rect x="771" y="412" width="18" height="5" fill="#c9a227"/>
+<text x="802" y="385" font-size="11" font-weight="bold" fill="#111">R1 = 4.7 kΩ</text><text x="802" y="400" font-size="9" fill="#666">yellow-violet-red-gold</text><text x="802" y="413" font-size="9" fill="#666">(4.7–10 kΩ works)</text>
+<rect x="905" y="580" width="270" height="70" rx="6" fill="#d8dde3" stroke="#6b7480" stroke-width="2"/>
+<rect x="895" y="590" width="20" height="50" fill="#b9c0c8" stroke="#6b7480"/><rect x="1165" y="590" width="20" height="50" fill="#b9c0c8" stroke="#6b7480"/>
+<path d="M1000 615 H1080 M1065 603 L1080 615 L1065 627" fill="none" stroke="#1565c0" stroke-width="4"/>
+<text x="1040" y="672" text-anchor="middle" font-size="10" fill="#1565c0">water flow → (follow the arrow on the body)</text>
+<rect x="930" y="450" width="130" height="130" rx="6" fill="#2b2f36" stroke="#111" stroke-width="2"/>
+<text x="1000" y="500" text-anchor="middle" font-size="13" font-weight="bold" fill="#fff">YF-DN40</text><text x="1000" y="518" text-anchor="middle" font-size="10" fill="#cbd2db">hall-effect sensor</text><text x="1000" y="534" text-anchor="middle" font-size="9" fill="#cbd2db">G1.5" inline, NPN out</text>
+<circle cx="930" cy="478" r="4" fill="#d9a800" stroke="#fff"/><text x="938" y="481" font-size="8" fill="#fff"></text>
+<text x="850" y="472" font-size="9" fill="#333">Yellow: signal</text>
+<circle cx="930" cy="508" r="4" fill="#555" stroke="#fff"/><text x="938" y="511" font-size="8" fill="#fff"></text>
+<text x="852" y="502" font-size="9" fill="#333">Black: GND</text>
+<circle cx="930" cy="538" r="4" fill="#b71c1c" stroke="#fff"/><text x="938" y="541" font-size="8" fill="#fff"></text>
+<text x="874" y="532" font-size="9" fill="#333">Red: VCC</text>
+<path d="M200 590 H270" fill="none" stroke="#222" stroke-width="3" stroke-linejoin="round"/>
+<path d="M200 622 H270" fill="none" stroke="#b71c1c" stroke-width="3" stroke-linejoin="round"/>
+<path d="M235 622 V770 H870 V538 H930" fill="none" stroke="#b71c1c" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="235" cy="622" r="4.5" fill="#b71c1c"/>
+<path d="M420 590 H440 V502 H480" fill="none" stroke="#222" stroke-width="3" stroke-linejoin="round"/>
+<path d="M440 590 V730 H830 V508 H930" fill="none" stroke="#222" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="440" cy="590" r="4.5" fill="#222"/>
+<path d="M420 622 H432 A8 8 0 0 1 448 622 H480" fill="none" stroke="#e53935" stroke-width="3" stroke-linejoin="round"/>
+<path d="M480 190 H400 V110 H780 V355" fill="none" stroke="#ef8f00" stroke-width="3" stroke-linejoin="round"/>
+<path d="M780 427 V478" fill="none" stroke="#d9a800" stroke-width="3" stroke-linejoin="round"/>
+<path d="M660 478 H930" fill="none" stroke="#d9a800" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="780" cy="478" r="4.5" fill="#d9a800"/>
+<text x="600" y="104" text-anchor="middle" font-size="10" fill="#b36b00">3.3 V</text>
+<text x="760" y="496" text-anchor="middle" font-size="10" fill="#8a6a00">pulse signal</text>
+<text x="600" y="724" text-anchor="middle" font-size="10" fill="#222">GND</text>
+<text x="600" y="764" text-anchor="middle" font-size="10" fill="#b71c1c">+12 / 24 V</text>
+<text x="456" y="616" text-anchor="end" font-size="10" fill="#c62828">5 V</text>
+<rect x="40" y="130" width="340" height="190" rx="6" fill="#f7f9fb" stroke="#c9d1da"/>
+<text x="56" y="152" font-size="13" font-weight="bold" fill="#111">Connections</text>
+<rect x="56" y="165" width="10" height="10" fill="#b71c1c"/><text x="74" y="174" font-size="11" fill="#222">Sensor red (VCC)  →  PSU +12/24 V</text>
+<rect x="56" y="185" width="10" height="10" fill="#222"/><text x="74" y="194" font-size="11" fill="#222">Sensor black (GND)  →  common GND</text>
+<rect x="56" y="205" width="10" height="10" fill="#d9a800"/><text x="74" y="214" font-size="11" fill="#222">Sensor yellow (signal)  →  GPIO4</text>
+<rect x="56" y="225" width="10" height="10" fill="#ef8f00"/><text x="74" y="234" font-size="11" fill="#222">R1 4.7 kΩ  between GPIO4 and 3V3</text>
+<rect x="56" y="245" width="10" height="10" fill="#e53935"/><text x="74" y="254" font-size="11" fill="#222">Buck OUT+ (5.0 V)  →  board 5V pin</text>
+<rect x="56" y="265" width="10" height="10" fill="#222"/><text x="74" y="274" font-size="11" fill="#222">Buck OUT−  →  board GND</text>
+<rect x="56" y="285" width="10" height="10" fill="#999"/><text x="74" y="294" font-size="11" fill="#222">PSU  →  buck IN+ / IN−</text>
+<rect x="900" y="130" width="270" height="150" rx="6" fill="#f4f4f4" stroke="#999" stroke-width="2" stroke-dasharray="6,4"/>
+<text x="914" y="154" font-size="12" font-weight="bold" fill="#666">Not in phase 1 (report-only)</text>
+<text x="914" y="172" font-size="11" fill="#666">Later: a relay on a spare GPIO into the</text>
+<text x="914" y="190" font-size="11" fill="#666">pump controller's low-voltage interlock,</text>
+<text x="914" y="208" font-size="11" fill="#666">gated by no_flow_alarm AND "pump should</text>
+<text x="914" y="226" font-size="11" fill="#666">run". Fail-safe: relay energised = run,</text>
+<text x="914" y="244" font-size="11" fill="#666">so losing ESP32 power stops the pump.</text>
+<text x="600" y="812" text-anchor="middle" font-size="11" fill="#555">Pin positions drawn for the common 38-pin ESP32-DevKitC layout. Check the silkscreen on your board: only 5V, GND, 3V3 and GPIO4 are used.</text>
+<text x="600" y="830" text-anchor="middle" font-size="11" fill="#555">The micro-USB port is for flashing and bench power only. In service the board is powered through its 5V pin.</text>
 </svg>

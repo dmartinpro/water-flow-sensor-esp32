@@ -1,7 +1,7 @@
 # Pool Filtration Flow Monitor
 
 Monitors water flow through a swimming pool filtration system using a
-**YF-DN40** hall-effect flow sensor and an **ESP32-S3**, and reports live
+**YF-DN40** hall-effect flow sensor and an **ESP32**, and reports live
 readings to **MQTT**. The goal: know at a glance (and via alerts) whether the
 pump is actually circulating water, and catch a no-flow condition — dry
 running, a closed valve, a clogged strainer — before it damages the pump.
@@ -16,7 +16,7 @@ the path to automatic cutoff.
 
 ```mermaid
 flowchart LR
-    S["YF-DN40 flow sensor\n(pulse output)"] -->|pull-up + GPIO4| E["ESP32-S3\n(ESPHome)"]
+    S["YF-DN40 flow sensor\n(pulse output)"] -->|pull-up + GPIO4| E["ESP32\n(ESPHome)"]
     E -->|WiFi / MQTT| B[(MQTT broker)]
     B --> A["Your automation\n(Home Assistant / Node-RED / scripts)"]
     A -.future phase.-> R["Relay -> pump controller\ninterlock input"]
@@ -40,8 +40,8 @@ free, in a single readable YAML file:
 | Qty | Component | Notes |
 |---|---|---|
 | 1 | YF-DN40 water flow sensor | G1.5" inline, hall-effect / NPN open-collector pulse output. Already owned. |
-| 1 | ESP32-S3 dev board (e.g. ESP32-S3-DevKitC-1) | USB-C, onboard 5V→3.3V regulation and USB flashing. |
-| 1 | DC-DC buck converter, adjustable, set to 5.0V output (e.g. LM2596 module) | Steps your existing 12V/24V DC supply down to 5V for the ESP32-S3's 5V/VIN pin. |
+| 1 | ESP32 dev board (e.g. ESP32-DevKitC) | Micro-USB with onboard USB-UART chip and 5V→3.3V regulation. |
+| 1 | DC-DC buck converter, adjustable, set to 5.0V output (e.g. LM2596 module) | Steps your existing 12V/24V DC supply down to 5V for the ESP32's 5V/VIN pin. |
 | 1 | Pull-up resistor, 4.7 kΩ–10 kΩ, 1/4W | Pulls the sensor's open-collector signal line up to 3.3V logic level. |
 | 1 | IP65-or-better enclosure with cable glands | Pool equipment rooms are humid; a bare dev board won't survive long. |
 | 1 | Terminal blocks (DIN rail or screw-terminal breakout) | For 12/24V, GND, and sensor wiring — avoid twisted bare wires in a wet area. |
@@ -54,16 +54,27 @@ free, in a single readable YAML file:
 
 ![Wiring diagram](docs/wiring-diagram.svg)
 
-- **Sensor Red (VCC)** → 12/24V+ rail directly (within the YF-DN40's rated
-  3.5–24V supply range; it only draws ~15 mA).
-- **Sensor Black (GND)** → common ground, tied together with the DC supply
-  negative, buck converter GND, and ESP32-S3 GND.
-- **Sensor Yellow (Signal)** → ESP32-S3 **GPIO4**, with a 4.7–10 kΩ pull-up
-  resistor between GPIO4 and the ESP32-S3's **3V3** pin. The sensor's output
-  is open-collector (idle high, pulled low per pulse), so the pull-up is
-  required regardless of the sensor's own supply voltage.
-- **Buck converter output (5V)** → ESP32-S3 **5V/VIN** pin — not 3V3; let the
-  board's onboard regulator handle 5V→3.3V.
+The diagram shows the board as it is: a 38-pin ESP32-DevKitC style board
+(classic ESP32, CP2102 USB-UART chip, micro-USB at the bottom). Pin positions
+follow the common DevKitC layout. Check the silkscreen on your board before
+wiring: only four pins are used.
+
+| From | To | Note |
+|---|---|---|
+| DC supply **+** | Sensor **red** (VCC) and buck **IN+** | The sensor accepts 3.5–24V and draws about 15 mA. |
+| DC supply **−** | Buck **IN−** | Same net as every GND below. |
+| Buck **OUT−** | Board **GND** (left header, 14th pin from the top) | Set the buck output to 5.0V with its trimmer before connecting the board. |
+| Buck **OUT+** | Board **5V** pin (left header, bottom) | Not the 3V3 pin. The board's regulator makes 3.3V. |
+| Sensor **black** (GND) | Common GND | Joins the DC supply − and the board GND. |
+| Sensor **yellow** (signal) | Board **GPIO4** (right header, 13th pin from the top) | Open-collector output, idle high, pulled low per pulse. |
+| **R1** 4.7 kΩ (4.7–10 kΩ works) | Between GPIO4 and board **3V3** (left header, top) | Required pull-up, whatever the sensor supply voltage is. |
+
+- **Power while testing:** the micro-USB port powers and flashes the board on
+  the bench. In service, power it through the 5V pin. Do not connect USB and
+  the buck output to the board at the same time unless your board has a
+  diode on its 5V rail. Check this first.
+- The first and last header pins of your board may be labelled differently
+  (for example `VIN` instead of `5V`). The function is the same.
 - Double-check the **flow-direction arrow** printed on the sensor body when
   plumbing it in-line.
 - Keep the AC/mains side of anything (if you later add pump switching)
@@ -120,7 +131,7 @@ its IP) for a quick check without an MQTT client.
    esphome config esphome/water-flow-sensor.yaml
    ```
 
-4. First flash, over USB, with the board connected via its USB-C port:
+4. First flash, over USB, with the board connected via its USB port:
 
    ```bash
    esphome run esphome/water-flow-sensor.yaml
@@ -158,7 +169,7 @@ If you ever swap in a different flow sensor model, update the two
 
 Not built in phase 1, but the design leaves room for:
 
-- **Automatic pump cutoff.** Add a relay/SSR driven from a spare ESP32-S3
+- **Automatic pump cutoff.** Add a relay/SSR driven from a spare ESP32
   GPIO into your pump controller's existing low-voltage interlock input,
   gated on `no_flow_alarm` **and** "pump expected to be running" (so the
   pump being off on schedule isn't treated as a fault). Wire it fail-safe:
@@ -185,6 +196,6 @@ Not built in phase 1, but the design leaves room for:
   (`wifi_signal` topic) and that the fallback AP hasn't activated (device
   couldn't reach your WiFi) — connect to `<friendly_name> Fallback` to
   reconfigure.
-- **`esphome run` can't find the board over USB**: some ESP32-S3 boards need
+- **`esphome run` can't find the board over USB**: some ESP32 boards need
   the BOOT button held while plugging in, or immediately after starting the
   flash command, to enter the bootloader.
